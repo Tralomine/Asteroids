@@ -115,6 +115,8 @@ string valueToString(ValueType valT){
     case BOOL:
       return "BOOL";
       break;
+    default:
+      return "UNKNOW";
   }
 }
 
@@ -223,9 +225,7 @@ ostream& operator<<(ostream& flux, const Value& val)
             flux << Array(val);
             break;
         case BOOL:
-            if(bool(val))
-              flux << "true";
-            else flux << "false";
+            bool(val)? flux << "true":flux << "false";
             break;
     }
     return flux;
@@ -303,19 +303,22 @@ json::Value json::parse(std::string const& string, size_t& i)
         skipUselessChar(string, i);
         i++; //on saute l'ouverture des guillemets
         std::string name("");
-        while(string[i] != '\"'){  //on enregistre le nom de la valeur
+        if(string[i] == '\"') throw std::invalid_argument("malformed json exception at char " + std::to_string(i) + ": invalid value name");
+        do{  //on enregistre le nom de la valeur
           name += string[i];
           i++;
-        }
+        }while(string[i] != '\"');
         i++; // on saute l'autre \"
         skipUselessChar(string, i);
-        i++; // on saute les :
+        if(string[i] == ':') i++; // on saute les :
+        else throw std::invalid_argument("malformed json exception at char " + std::to_string(i) + ": missing ':'");
         skipUselessChar(string, i);
         object[name] = parse(string, i);    //on parse la valeur et on la stock
         skipUselessChar(string, i);
       }while(string[i] == ',');   //si ça termine par une virgule, on reprend une autre valeur
     }
-    i++;  //on saute le }
+    if(string[i] == '}') i++;  //on saute le }
+    else throw std::invalid_argument("malformed json exception at char " + std::to_string(i) + ": missing '}' or ','");
     return json::Value(object);
   }
   else if(string[i] == '['){  //liste
@@ -330,7 +333,8 @@ json::Value json::parse(std::string const& string, size_t& i)
         skipUselessChar(string, i);
       } while(string[i] == ',');
     }
-    i++;  //on saute le ]
+    if(string[i] == ']') i++;  //on saute le ]
+    else throw std::invalid_argument("malformed json exception at char " + std::to_string(i) + ": missing ']' or ','");
     return json::Value(array);
   }
   else if(std::string("-0123456789").find(string[i]) != std::string::npos){ //nombres
@@ -338,47 +342,17 @@ json::Value json::parse(std::string const& string, size_t& i)
     do{//on récup la premiere partie du nombre
       number += string[i];
       i++;
-    }while(std::string("0123456789").find(string[i]) != std::string::npos);
-    if(string[i] == '.'){
+    }while(std::string("0123456789eE+-").find(string[i]) != std::string::npos);
+    if(string[i] == '.'){ //si double
       number += string[i];  //on récup la virgule
       i++;
-      while(std::string("0123456789").find(string[i]) != std::string::npos){
+      do{
         number += string[i];  //on recup après la virgule
         i++;
-      }
-      if(string[i] == 'e' || string[i] == 'E'){ //si exposant
-        i++;
-        std::string exponant("");
-        if(string[i] == '+' || string[i] == '-'){
-          exponant += string[i];
-          i++;
-        }
-        while(std::string("0123456789").find(string[i]) != std::string::npos){
-          exponant += string[i];
-          i++;
-        }
-        return json::Value(atof(number.data()) * std::pow(10, atoi(exponant.data())));
-      }
-      else{
-        return json::Value(atof(number.data()));
-      }
+      }while(std::string("0123456789eE+-").find(string[i]) != std::string::npos);
+      return json::Value(strtod(number.data(), NULL));
     }
-    else if(string[i] == 'e' || string[i] == 'E'){  //si pas double mais exposant
-      i++;
-      std::string exponant("");
-      if(string[i] == '+' || string[i] == '-'){
-        exponant += string[i];
-        i++;
-      }
-      while(std::string("0123456789").find(string[i]) != std::string::npos){
-        exponant += string[i];
-        i++;
-      }
-      return json::Value((int)(atoi(number.data()) * std::pow(10, atoi(exponant.data()))));
-    }
-    else{ //si pas double ni exposant
-      return json::Value(atoi(number.data()));
-    }
+    return json::Value((long)strtod(number.data(), NULL));
   }
   else if(string.substr(i, 4) == "null"){
       i += 4;
@@ -394,16 +368,15 @@ json::Value json::parse(std::string const& string, size_t& i)
   }
   else if(string[i] == '\"'){ //strings
     i++;  //on saute le "
-    std::string str("");
+    int j(i);
     do{
-      str += string[i];
       i++;
     }while(string[i] != '\"' || string[i-1] == '\\' );
     i++;  //on saute le " fermant
-    return  json::Value(str);
+    return  json::Value(string.substr(j, (i-j-1)));
   }
   else{
-    throw std::invalid_argument("malformed json exception : char " + i);
+    throw std::invalid_argument("malformed json exception at char " + std::to_string(i) + ": invalid value type");
   }
 
 }

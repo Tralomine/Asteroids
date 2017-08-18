@@ -533,7 +533,7 @@ int main()
               for (size_t x = 0; x < nbrChild; x++) {
                 float precdir(rand()%360*pi/180);
                 float v(rand()%256 / 128.0 + 0.5);
-                asteroids.push_back(createAsteroid(asteroids[j].pos, sf::Vector2f{(float)(v * cos(precdir)), (float)(v * sin(precdir))}, asteroids[j].size -1, asteroids[j].golden));
+                asteroids.push_back(createAsteroid(asteroids[j].pos, sf::Vector2f{(v * cosf(precdir)), (v * sinf(precdir))}, asteroids[j].size -1, asteroids[j].golden));
               }
             }else{
               unsigned int nbr(rand()%moneyDrop + moneyDrop/2);

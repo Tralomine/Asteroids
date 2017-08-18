@@ -42,7 +42,6 @@ void Player::init(int life, int maxLife, int shotType, double shotSpeed, int fir
 
 void Player::resetEffects()
 {
-  m_life = m_maxLife;
   m_lastHit = 0;
   m_lastshot = 0;
   m_position = sf::Vector2f(400, 300);

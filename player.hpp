@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <SFML/Graphics.hpp>
 #include "functions.hpp"
 #include "objects.hpp"
