@@ -121,7 +121,7 @@ void Player::update()
 bool Player::canShot() const
 {return m_lastshot == 0;}
 
-void Player::shot()
+bool Player::shot()
 {
   if(this->canShot()){
     double shotMultiplier(1);
@@ -145,7 +145,9 @@ void Player::shot()
       default:
         break;
     }
+    return true;
   }
+  return false;
 }
 
 void Player::setShotType(int shotType)

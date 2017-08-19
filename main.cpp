@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <cmath>
 #include <vector>
 #include <iostream>
@@ -152,8 +153,61 @@ int main()
 
   SwitchableShopUpgrade heal(0, {450, 420}, all, {80, 96, 16, 16}, "Retrieve all your health", fira);
 
+  sf::Music music;
+  music.openFromFile("assets/&l - officialandi - Z16.flac");
+  music.setLoop(true);
+  music.play();
+
+  sf::SoundBuffer hitBuffer;
+  hitBuffer.loadFromFile("assets/hit.ogg");
+  sf::Sound hitSound;
+  hitSound.setBuffer(hitBuffer);
+
+  sf::SoundBuffer clickBuffer;
+  clickBuffer.loadFromFile("assets/click.ogg");
+  sf::Sound clickSound;
+  clickSound.setBuffer(clickBuffer);
+
+  sf::SoundBuffer astHitBuffer;
+  astHitBuffer.loadFromFile("assets/asthit.ogg");
+  sf::Sound astHitSound;
+  astHitSound.setBuffer(astHitBuffer);
+
+  sf::SoundBuffer shotBuffer;
+  shotBuffer.loadFromFile("assets/shot.ogg");
+  sf::Sound shotSound[4];
+  for (size_t i = 0; i < 4; i++) {
+    shotSound[i].setBuffer(shotBuffer);
+  }
+
   /*======================INIT END=========================*/
 
+  float musicVolume(100.0);
+  float soundVolume(100.0);
+  int currentSound(0);
+
+  {
+    ifstream optionFile("options.json", ios::in | ios::binary);
+    if(optionFile.is_open()){
+      string optionStr( (std::istreambuf_iterator<char>(optionFile)),
+                        (std::istreambuf_iterator<char>()        ) );
+
+      size_t i(0);
+      json::Object options(json::parse(optionStr, i));
+
+      musicVolume = (float)options["Audio"]["Music Volume"];
+      soundVolume = (float)options["Audio"]["Sound Volume"];
+    }
+    optionFile.close();
+  }
+
+  music.setVolume(musicVolume);
+  hitSound.setVolume(soundVolume);
+  clickSound.setVolume(soundVolume);
+  astHitSound.setVolume(soundVolume);
+  for (size_t i = 0; i < 4; i++) {
+    shotSound[i].setVolume(soundVolume);
+  }
 
   //gameloop
   while (app.isOpen()){
@@ -214,10 +268,15 @@ int main()
     while(!next){
       while (app.pollEvent(event)){
         if (event.type == sf::Event::Closed || quit.isClicked(event, app)){
+          clickSound.play();
           app.close();
           next = true;
         }
+        if(option.isClicked(event, app)){
+          clickSound.play();
+        }
         if(play.isClicked(event, app)){
+          clickSound.play();
           next = true;
         }
       }
@@ -248,6 +307,7 @@ int main()
         }
         if((event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) || (event.type == sf::Event::MouseButtonPressed && goShop.isClicked(event, app))){
           /*======================SHOP=========================*/
+          clickSound.play();
           next = false;
           while(!next){
             while(app.pollEvent(event)){
@@ -256,53 +316,65 @@ int main()
                 next = true;
               }
               if((event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) || (event.type == sf::Event::MouseButtonPressed && shopBack.isClicked(event, app))){
+                clickSound.play();
                 next = true;
               }
               if((event.type == sf::Event::MouseButtonPressed && backMenu.isClicked(event, app))){
+                clickSound.play();
                 next = true;
                 gameIsPlaying = false;
               }
               if(event.type == sf::Event::MouseButtonPressed){
                 if(shopUpgrades[0].canBuy(money) && shopUpgrades[0].tryBuy(event, app)){
+                  clickSound.play();
                   shopUpgrades[0].buy(money);
                   player.setShotSpeed(player.getShotSpeed()* 0.95f);
                 }
                 if(shopUpgrades[1].canBuy(money) && shopUpgrades[1].tryBuy(event, app)){
+                  clickSound.play();
                   shopUpgrades[1].buy(money);
                   player.setSpeed(player.getSpeed()*1.15f);
                 }
                 if(shopUpgrades[2].canBuy(money) && shopUpgrades[2].tryBuy(event, app)){
+                  clickSound.play();
                   shopUpgrades[2].buy(money);
                   player.setRotationSpeed(player.getRotationSpeed()*1.2);
                 }
                 if(shopUpgrades[3].canBuy(money) && shopUpgrades[3].tryBuy(event, app)){
+                  clickSound.play();
                   shopUpgrades[3].buy(money);
                   player.setMaxLife(player.getMaxLife()+1);
                   player.setLife(player.getLife()+1);
                 }
                 if(shopUpgrades[4].canBuy(money) && shopUpgrades[4].tryBuy(event, app)){
+                  clickSound.play();
                   shopUpgrades[4].buy(money);
                   moneyDrop++;
                 }
                 if(shopUpgrades[5].canBuy(money) && shopUpgrades[5].tryBuy(event, app)){
+                  clickSound.play();
                   shopUpgrades[5].buy(money);
                   coinLevel++;
                 }
                 if(shopUpgrades[6].canBuy(money) && shopUpgrades[6].tryBuy(event, app)){
+                  clickSound.play();
                   shopUpgrades[6].buy(money);
                   player.setMagnetRange(player.getMagnetRange() + 16);
                 }
                 if(shopUpgrades[7].canBuy(money) && shopUpgrades[7].tryBuy(event, app)){
+                  clickSound.play();
                   shopUpgrades[7].buy(money);
                   astLevel++;
                 }
                 if(shopUpgrades[8].canBuy(money) && shopUpgrades[8].tryBuy(event, app)){
+                  clickSound.play();
                   shopUpgrades[8].buy(money);
                   goldRate++;
                 }
                 //switchable upgrade
                   //arme
                 if(weaponType[0].tryBuy(event, app)){
+                  clickSound.play();
                   weaponType[0].setActive(true);
                   weaponType[1].setActive(false);
                   weaponType[2].setActive(false);
@@ -315,6 +387,7 @@ int main()
                     }
                   }
                   if(weaponType[1].isBuyed()){
+                    clickSound.play();
                     weaponType[0].setActive(false);
                     weaponType[1].setActive(true);
                     weaponType[2].setActive(false);
@@ -328,6 +401,7 @@ int main()
                     }
                   }
                   if(weaponType[2].isBuyed()){
+                    clickSound.play();
                     weaponType[0].setActive(false);
                     weaponType[1].setActive(false);
                     weaponType[2].setActive(true);
@@ -336,6 +410,7 @@ int main()
                 }
                   //manière de tirer
                 if(weaponFire[0].tryBuy(event, app)){
+                  clickSound.play();
                   weaponFire[0].setActive(true);
                   weaponFire[1].setActive(false);
                   weaponFire[2].setActive(false);
@@ -348,6 +423,7 @@ int main()
                     }
                   }
                   if(weaponFire[1].isBuyed()){
+                    clickSound.play();
                     weaponFire[0].setActive(false);
                     weaponFire[1].setActive(true);
                     weaponFire[2].setActive(false);
@@ -361,6 +437,7 @@ int main()
                     }
                   }
                   if(weaponFire[2].isBuyed()){
+                    clickSound.play();
                     weaponFire[0].setActive(false);
                     weaponFire[1].setActive(false);
                     weaponFire[2].setActive(true);
@@ -370,6 +447,7 @@ int main()
 
                 if(heal.tryBuy(event, app)){
                   if(heal.canBuy(money)){
+                    clickSound.play();
                     heal.buy(money);
                     heal.unBuy();
                     player.setLife(player.getMaxLife());
@@ -432,7 +510,13 @@ int main()
       }
 
       if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)){
-        player.shot();
+        if(player.shot()){
+          shotSound[currentSound].setPosition(player.getPosition().x/800.f-0.5, player.getPosition().y/600.f-0.5, 0);
+          shotSound[currentSound].play();
+          currentSound++;
+          if(currentSound >= 4)
+            currentSound = 0;
+        }
       }
 
       if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q)){
@@ -516,6 +600,8 @@ int main()
       for (size_t j = 0; j < asteroids.size(); j++) {
         int colide(Shot::colide(asteroids[j]));
         if(colide > -1 && Shot::shots[colide].canTouch()){
+          astHitSound.setPosition(asteroids[j].pos.x/800.f-0.5, asteroids[j].pos.y/600.f-0.5, 0);
+          astHitSound.play();
           if(Shot::shots[colide].getType() == 2){
             asteroids[j].life -= 4;
           }
@@ -581,6 +667,8 @@ int main()
           if(player.isHit(asteroids[i])){
             score -= 500;
             asteroids.erase(asteroids.cbegin()+i);
+            hitSound.setPosition(player.getPosition().x/800.f-0.5, player.getPosition().y/600.f-0.5, 0);
+            hitSound.play();
             i--;
             if(!player.isAlive()){
               gameIsPlaying = false;
@@ -802,7 +890,7 @@ int main()
       save["shop upgrade"] = jsonShopUpgrades;
       save["weapons"] = jsonWeapons;
 
-      json::Value::minify = true;
+      json::Value::minify = false;
 
       ofstream saveFile("save", ios::out | ios::binary);
       saveFile << save;

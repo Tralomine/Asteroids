@@ -20,7 +20,7 @@ class Player : public sf::Drawable
     void rotateRight();
 
     void update();
-    void shot();
+    bool shot();
     void resetEffects();
 
     void setPosition(const sf::Vector2f& pos);
