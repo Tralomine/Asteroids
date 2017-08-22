@@ -28,18 +28,19 @@ json:
 	g++ -c -fPIC -m64 json/json.cpp -o json/json.o
 	g++ -g -c -fPIC -m64 json/json.cpp -o json/json-debug.o
 
-#\
-COMP := x86_64-w64-mingw32-g++.exe\
-SFML := -DSFML_STATIC -I"C:\SFML-2.4.2\include"\
-LIBS := -static -static-libstdc++ -static-libgcc -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lmingw32 -luser32 -lgdi32 -lwinmm -ldxguid -mwindows -lopengl32 -lfreetype -ljpeg\
-FLAGS := -c -m64 -Wall -O2\
-\
-ALL := $(FLAGS) $(SFML)\
-\
-windows:\
-	$(COMP) $(ALL) functions.cpp -o functions.o\
-	$(COMP) $(ALL) shop.cpp -o shop.o\
-	$(COMP) $(ALL) objects.cpp -o objects.o\
-	$(COMP) $(ALL) player.cpp -o player.o\
-	$(COMP) $(ALL) main.cpp -o main.o\
-	$(COMP) -DSFML_STATIC -LC:\SFML-2.4.2\lib main.o functions.o shop.o objects.o player.o  -o asteroids.exe $(LIBS)\
+
+COMP := x86_64-w64-mingw32-g++.exe
+SFMLPATH := -DSFML_STATIC -I"C:\SFML-2.4.2\include"
+LIBS := -static -static-libstdc++ -static-libgcc -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lmingw32 -luser32 -lgdi32 -lwinmm -ldxguid -mwindows -lopengl32 -lfreetype -ljpeg
+FLAGS := -c -m64 -Wall -O2
+
+WINDOWS := $(FLAGS) $(SFMLPATH)
+
+windows:
+	$(COMP) $(FLAGS) -fPIC json/json.cpp -o json/json-windows.o
+	$(COMP) $(WINDOWS) functions.cpp -o functions.o
+	$(COMP) $(WINDOWS) shop.cpp -o shop.o
+	$(COMP) $(WINDOWS) objects.cpp -o objects.o
+	$(COMP) $(WINDOWS) player.cpp -o player.o
+	$(COMP) $(WINDOWS) main.cpp -o main.o
+	$(COMP) -DSFML_STATIC -LC:\SFML-2.4.2\lib main.o json/json-windows.o functions.o shop.o objects.o player.o  -o asteroids.exe $(LIBS) $(SFML-AUDIO)
