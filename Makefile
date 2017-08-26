@@ -37,10 +37,10 @@ FLAGS := -c -m64 -Wall -O2
 WINDOWS := $(FLAGS) $(SFMLPATH)
 
 windows:
-	$(COMP) $(FLAGS) -fPIC json/json.cpp -o json/json-windows.o
-	$(COMP) $(WINDOWS) functions.cpp -o functions.o
-	$(COMP) $(WINDOWS) shop.cpp -o shop.o
-	$(COMP) $(WINDOWS) objects.cpp -o objects.o
-	$(COMP) $(WINDOWS) player.cpp -o player.o
+#	$(COMP) $(FLAGS) -fPIC json/json.cpp -o json/json-windows.o
+#	$(COMP) $(WINDOWS) functions.cpp -o functions.o
+#	$(COMP) $(WINDOWS) shop.cpp -o shop.o
+#	$(COMP) $(WINDOWS) objects.cpp -o objects.o
+#	$(COMP) $(WINDOWS) player.cpp -o player.o
 	$(COMP) $(WINDOWS) main.cpp -o main.o
 	$(COMP) -DSFML_STATIC -LC:\SFML-2.4.2\lib main.o json/json-windows.o functions.o shop.o objects.o player.o  -o asteroids.exe $(LIBS) $(SFML-AUDIO)

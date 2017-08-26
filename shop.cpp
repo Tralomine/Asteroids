@@ -204,9 +204,9 @@ bool SwitchableShopUpgrade::isBuyed() const
   return m_isBuyed;
 }
 
-void SwitchableShopUpgrade::unlock()
+void SwitchableShopUpgrade::unlock(bool unlocked)
 {
-  m_isBuyed = true;
+  m_isBuyed = unlocked;
 }
 
 void SwitchableShopUpgrade::setPrice(int newPrice)

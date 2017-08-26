@@ -1,9 +1,26 @@
 #pragma once
-
 #include <SFML/Graphics.hpp>
-#include "functions.hpp"
+#include <vector>
 
+#include "functions.hpp"
 #include "consts.hpp"
+
+struct Triangle{
+  sf::Vector2f points[3];
+};
+
+class Clickable{
+  public:
+    virtual void click() = 0;
+  private:
+    std::vector<Triangle> triangles;
+};
+
+class Colidable{
+  public:
+    virtual void colide(Colidable);
+  private:
+};
 
 struct Asteroid{
   sf::Vector2f pos;

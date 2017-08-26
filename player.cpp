@@ -4,18 +4,18 @@
 Player::Player(const sf::Texture& texture, const sf::IntRect& textureRect):
 m_position(400, 300),
 m_spaceShipComp(texture, textureRect),
-m_spaceshipUpdate(0),
-m_maxLife(10),
-m_life(10),
+m_reactorUpdate(0),
+m_maxLife(10), m_life(10),
 m_lastHit(0),
 m_lastshot(0),
 m_shotType(0),
 m_shotSpeed(30),
 m_fireType(0),
-m_speed(1.0),
+m_speed(1.0), m_rotateSpeed(1.0),
 m_lifespan(0),
-m_rotateSpeed(1.0),
-m_magnetRange(32)
+m_magnetRange(32),
+m_shield(0), m_shieldMax(0),
+m_shieldCooldown(0)
 {
   m_sprite.setOrigin(16, 16);
   m_sprite.scale(2, 2);
@@ -28,7 +28,7 @@ m_magnetRange(32)
   }
 }
 
-void Player::init(int life, int maxLife, int shotType, double shotSpeed, int fireType, double speed, double rotationSpeed, int magnetRange)
+void Player::init(int life, int maxLife, int shotType, double shotSpeed, int fireType, double speed, double rotationSpeed, int magnetRange, int shieldMax, int shield)
 {
   m_life = life;
   m_maxLife = maxLife;
@@ -38,6 +38,8 @@ void Player::init(int life, int maxLife, int shotType, double shotSpeed, int fir
   m_speed = speed;
   m_rotateSpeed = rotationSpeed;
   m_magnetRange = magnetRange;
+  m_shieldMax = shieldMax;
+  m_shield = shield;
 }
 
 void Player::resetEffects()
@@ -96,24 +98,29 @@ void Player::update()
 
   if(m_lastshot > 0) m_lastshot--;
   if(m_lastHit > 0) m_lastHit--;
+  if(m_shieldCooldown > 0) m_shieldCooldown--;
+  if(m_shieldCooldown == 0 && m_shield < m_shieldMax){
+    m_shield++;
+    m_shieldCooldown = 900;
+  }
   m_lifespan++;
 
   m_sprite.setColor(sf::Color(255, 255-(255/30.0*m_lastHit), 255-(255/30.0*m_lastHit)));
   m_sprite.setRotation(m_rotation);
 
-  if(m_spaceshipUpdate-- == 0){
-    m_spaceShipTexture.clear(sf::Color::Transparent);
-    m_spaceShipTexture.draw(m_spaceShipComp);
-    int i(rand()%8);
-    m_reactorComp[i].setPosition(7, 24);
-    m_spaceShipTexture.draw(m_reactorComp[i]);
-    i = rand()%8;
-    m_reactorComp[i].setPosition(17, 24);
-    m_spaceShipTexture.draw(m_reactorComp[i]);
-    m_spaceShipTexture.display();
-
-    m_spaceshipUpdate = 4;
+  if(m_reactorUpdate-- == 0){
+    m_react1 = rand()%8;
+    m_react2 = rand()%8;
+    m_reactorUpdate = 4;
   }
+
+  m_spaceShipTexture.clear(sf::Color::Transparent);
+  m_spaceShipTexture.draw(m_spaceShipComp);
+  m_reactorComp[m_react1].setPosition(7, 24);
+  m_spaceShipTexture.draw(m_reactorComp[m_react1]);
+  m_reactorComp[m_react2].setPosition(17, 24);
+  m_spaceShipTexture.draw(m_reactorComp[m_react2]);
+  m_spaceShipTexture.display();
 
   m_sprite.setTexture(m_spaceShipTexture.getTexture());
 }
@@ -168,10 +175,20 @@ bool Player::canBeHit() const
 bool Player::isHit(const Asteroid& astr)
 {
   if(dist(m_position, astr.pos) < (astr.size+1) * 16 + 16){
-    m_life--;
-    m_lastHit = 30;
     return true;
   }else return false;
+}
+
+bool Player::takeDamage()
+{
+  m_lastHit = 30;
+  if(m_shield == 0){
+    m_life--;
+    return true;
+  }else{
+    m_shield--;
+    return false;
+  }
 }
 
 bool Player::isAlive() const
@@ -249,13 +266,40 @@ int Player::getFireType() const
   return m_fireType;
 }
 
+void Player::setShieldMax(int newShield)
+{
+  m_shieldMax = newShield;
+}
+
+int Player::getShieldMax() const
+{
+  return m_shieldMax;
+}
+
+// void Player::setShield(int newShield)
+// {
+//   m_shield = newShield;
+// }
+
+int Player::getShield() const
+{
+  return m_shield;
+}
+
 
 void Player::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
   sf::Sprite temp(m_sprite);
+  sf::CircleShape shieldText(32);
+  shieldText.setOutlineColor(sf::Color(255, 200, 0, 32*m_shield));
+  shieldText.setOutlineThickness(4);
+  shieldText.setFillColor(sf::Color(255, 200, 0, 16*m_shield));
+  shieldText.setOrigin(32, 32);
   for (int i = -1; i <= 1; i++) {
     for (int j = -1; j <= 1; j++) {
+      shieldText.setPosition(m_position.x + i*800, m_position.y + j*600);
       temp.setPosition(m_position.x + i*800, m_position.y + j*600);
+      target.draw(shieldText);
       target.draw(temp);
     }
   }

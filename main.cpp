@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <cctype>
 
 #include "json/json.hpp"
 
@@ -132,14 +133,15 @@ int main()
 
   vector<ShopUpgrade> shopUpgrades({});
   shopUpgrades.push_back(ShopUpgrade(20, 99, {60, 100}, all, {0, 96, 16, 16}, 1.8f, "Increase shot speed rate", fira));
-  shopUpgrades.push_back(ShopUpgrade(10, 100, {60, 150}, all, {0, 112, 16, 16}, 2.75f, "Increase movement speed", fira));
-  shopUpgrades.push_back(ShopUpgrade(10, 100, {60, 200}, all, {0, 128, 16, 16}, 2.75f, "Increase maniability", fira));
-  shopUpgrades.push_back(ShopUpgrade(15, 32, {60, 250}, all, {16, 96, 16, 16}, 2.2222f, "Increase max life", fira));
-  shopUpgrades.push_back(ShopUpgrade(10, 500, {60, 300}, all, {16, 112, 16, 16}, 3.f, "Increase coin drop", fira));
-  shopUpgrades.push_back(ShopUpgrade(7, 2342, {60, 350}, all, {32, 96, 16, 16}, 4.f, "Increase coin value", fira));
-  shopUpgrades.push_back(ShopUpgrade(12, 350, {60, 400}, all, {32, 112, 16, 16}, 2.14159f, "Increase coin magnet range", fira));
-  shopUpgrades.push_back(ShopUpgrade(11, 123, {60, 450}, all, {32, 128, 16, 16}, 2.71828f, "Increase asteroids spawn rate", fira));
-  shopUpgrades.push_back(ShopUpgrade(14, 255, {60, 500}, all, {32, 128, 16, 16}, 1.99f, "Increase golden asteroids rate", fira));
+  shopUpgrades.push_back(ShopUpgrade(10, 100, {60, 145}, all, {0, 112, 16, 16}, 2.75f, "Increase movement speed", fira));
+  shopUpgrades.push_back(ShopUpgrade(10, 100, {60, 190}, all, {0, 128, 16, 16}, 2.75f, "Increase maniability", fira));
+  shopUpgrades.push_back(ShopUpgrade(15, 32, {60, 235}, all, {16, 96, 16, 16}, 2.2222f, "Increase max life", fira));
+  shopUpgrades.push_back(ShopUpgrade(10, 500, {60, 280}, all, {16, 112, 16, 16}, 3.f, "Increase coin drop", fira));
+  shopUpgrades.push_back(ShopUpgrade(7, 2342, {60, 325}, all, {32, 96, 16, 16}, 4.f, "Increase coin value", fira));
+  shopUpgrades.push_back(ShopUpgrade(12, 350, {60, 370}, all, {32, 112, 16, 16}, 2.14159f, "Increase coin magnet range", fira));
+  shopUpgrades.push_back(ShopUpgrade(11, 123, {60, 415}, all, {32, 128, 16, 16}, 2.71828f, "Increase asteroids spawn rate", fira));
+  shopUpgrades.push_back(ShopUpgrade(14, 255, {60, 460}, all, {32, 144, 16, 16}, 1.99f, "Increase golden asteroids rate", fira));
+  shopUpgrades.push_back(ShopUpgrade(3, 2048, {60, 505}, all, {16, 128, 16, 16}, 4.f, "Increase shield level", fira));
 
   vector<SwitchableShopUpgrade> weaponType({});
   weaponType.push_back(SwitchableShopUpgrade(0, {450, 100}, all, {48, 96, 16, 16}, "base shots", fira));
@@ -230,7 +232,10 @@ int main()
                     (int)save["player"]["fire type"],
                     (double)save["player"]["speed"],
                     (double)save["player"]["rotation speed"],
-                    (int)save["player"]["magnet range"]);
+                    (int)save["player"]["magnet range"],
+                    (int)save["player"]["shield"]["max"],
+                    (int)save["player"]["shield"]["level"]
+                  );
 
         money = (int)save["money"]["money"];
         totalMoney = (int)save["money"]["total"];
@@ -243,29 +248,34 @@ int main()
         goldRate = (int)save["asteroids"]["golden chance"];
 
         for (size_t i = 0; i < shopUpgrades.size(); i++){
-          shopUpgrades[i].unlock((int)save["shop upgrade"][i]);
+          if(i < save["shop upgrade"].size())
+            shopUpgrades[i].unlock((int)save["shop upgrade"][i]);
         }
         for (size_t i = 0; i < weaponType.size(); i++){
-          if((bool)save["weapons"]["shot type"][i] == true)
-          weaponType[i].unlock();
+          if(i < save["weapons"]["shot type"].size())
+            weaponType[i].unlock((bool)save["weapons"]["shot type"][i]);
         }
         for (size_t i = 0; i < weaponFire.size(); i++){
-          if((bool)save["weapons"]["firing pattern"][i] == true)
-          weaponFire[i].unlock();
+          if(i < save["weapons"]["firing pattern"].size())
+            weaponFire[i].unlock((bool)save["weapons"]["firing pattern"][i]);
         }
       }
       saveFile.close();
     }
-    weaponType[0].unlock();
+    weaponType[0].unlock(true);
     weaponType[0].setActive(true);
-    weaponFire[0].unlock();
+    weaponFire[0].unlock(true);
     weaponFire[0].setActive(true);
 
     sf::Event event;
 
+    /*string stringTest("");*/
+
     bool next(false);
     // menu
     while(!next){
+      /*t++;*/
+
       while (app.pollEvent(event)){
         if (event.type == sf::Event::Closed || quit.isClicked(event, app)){
           clickSound.play();
@@ -279,6 +289,13 @@ int main()
           clickSound.play();
           next = true;
         }
+/*        if(event.type == sf::Event::TextEntered){
+          if((isprint(event.text.unicode))  && stringTest.size() < 20)
+              stringTest += static_cast<char>(event.text.unicode);
+          if(event.text.unicode == 8 && stringTest.size() > 0)
+            stringTest = stringTest.substr(0, stringTest.size()-1);
+          cout << event.text.unicode << " " << stringTest << endl;
+        }*/
       }
       play.updateHover(app);
       option.updateHover(app);
@@ -288,6 +305,13 @@ int main()
       app.draw(play);
       app.draw(option);
       app.draw(quit);
+
+/*      if(t%40 > 20)stringTest += '|';
+      sf::Text typeIn(stringTest, fira);
+      typeIn.setFillColor(sf::Color::White);
+      typeIn.setPosition(250, 250);
+      app.draw(typeIn);
+      if(t%40 > 20)stringTest = stringTest.substr(0, stringTest.size()-1);*/
       app.display();
     }
 
@@ -305,8 +329,8 @@ int main()
           app.close();
           break;
         }
+        /*======================SHOP=========================*/
         if((event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) || (event.type == sf::Event::MouseButtonPressed && goShop.isClicked(event, app))){
-          /*======================SHOP=========================*/
           clickSound.play();
           next = false;
           while(!next){
@@ -370,6 +394,11 @@ int main()
                   clickSound.play();
                   shopUpgrades[8].buy(money);
                   goldRate++;
+                }
+                if(shopUpgrades[9].canBuy(money) && shopUpgrades[9].tryBuy(event, app)){
+                  clickSound.play();
+                  shopUpgrades[9].buy(money);
+                  player.setShieldMax(player.getShieldMax()+1);
                 }
                 //switchable upgrade
                   //arme
@@ -492,8 +521,8 @@ int main()
 
             app.display();
           }
-            /*======================SHOP=========================*/
         }
+        /*======================SHOP=========================*/
       }
 
 	  if(!gameIsPlaying) break;
@@ -665,10 +694,11 @@ int main()
       if(player.canBeHit()){
         for (size_t i = 0; i < asteroids.size(); i++) {
           if(player.isHit(asteroids[i])){
-            score -= 500;
-            asteroids.erase(asteroids.cbegin()+i);
+            if(player.takeDamage())
+              score -= 500;
             hitSound.setPosition(player.getPosition().x/800.f-0.5, player.getPosition().y/600.f-0.5, 0);
             hitSound.play();
+            asteroids.erase(asteroids.cbegin()+i);
             i--;
             if(!player.isAlive()){
               gameIsPlaying = false;
@@ -823,6 +853,10 @@ int main()
         jsonplayer["speed"] = player.getSpeed();
         jsonplayer["rotation speed"] = player.getRotationSpeed();
         jsonplayer["magnet range"] = player.getMagnetRange();
+        json::Object jsonplayershield;
+        jsonplayershield["level"] = player.getShield();
+        jsonplayershield["max"] = player.getShieldMax();
+        jsonplayer["shield"] = jsonplayershield;
 
         jsonmoney["money"] = (int)money;
         jsonmoney["total"] = (int)totalMoney;
@@ -857,6 +891,10 @@ int main()
         jsonplayer["speed"] = 1.0;
         jsonplayer["rotation speed"] = 1.0;
         jsonplayer["magnet range"] = 32;
+        json::Object jsonplayershield;
+        jsonplayershield["level"] = 0;
+        jsonplayershield["max"] = 0;
+        jsonplayer["shield"] = jsonplayershield;
 
         jsonmoney["money"] = 0;
         jsonmoney["total"] = 0;

@@ -57,6 +57,7 @@ namespace json{
         Value& operator[] (size_t i);
 
         ValueType getType() const {return _valueType;}
+        size_t size() const;
 
         static size_t indent;
         static bool minify;

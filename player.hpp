@@ -10,7 +10,7 @@ class Player : public sf::Drawable
   public:
     Player(const sf::Texture& texture, const sf::IntRect& textureRect);
 
-    void init(int life, int maxLife, int shotType, double shotSpeed, int fireType, double speed, double rotationSpeed, int magnetRange);
+    void init(int life, int maxLife, int shotType, double shotSpeed, int fireType, double speed, double rotationSpeed, int magnetRange, int shieldMax, int shield);
 
     void move(const float& x, const float& y);
     void move(const sf::Vector2f& pos);
@@ -30,6 +30,7 @@ class Player : public sf::Drawable
     void setFireType(int fireType);
     bool canBeHit() const;
     bool isHit(const Asteroid& astr);
+    bool takeDamage();
     bool isAlive() const;
     void setLife(int life);
     int getLife() const;
@@ -45,6 +46,10 @@ class Player : public sf::Drawable
     void setMagnetRange(int newRange);
     int getShotType() const;
     int getFireType() const;
+    void setShieldMax(int newShield);
+    int getShieldMax() const;
+    // void setShield(int newShield);
+    int getShield() const;
 
   private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
@@ -54,16 +59,17 @@ class Player : public sf::Drawable
     sf::Sprite m_sprite;
     sf::Sprite m_spaceShipComp, m_reactorComp[8];
     sf::RenderTexture m_spaceShipTexture;
-    int m_spaceshipUpdate;
-    int m_maxLife;
-    int m_life;
+    int m_reactorUpdate;
+    int m_maxLife, m_life;
     int m_lastHit;
     int m_lastshot;
     int m_shotType;
     double m_shotSpeed;
     int m_fireType;
-    double m_speed;
+    double m_speed, m_rotateSpeed;
     int m_lifespan;
-    double m_rotateSpeed;
     int m_magnetRange;
+    int m_shield, m_shieldMax;
+    int m_shieldCooldown;
+    int m_react1, m_react2;
 };

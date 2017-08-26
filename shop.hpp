@@ -59,7 +59,7 @@ class SwitchableShopUpgrade : public sf::Drawable{
     bool tryBuy(const sf::Event &event, const sf::RenderWindow& window) const;
     void setActive(bool activity);
     bool isBuyed() const;
-    void unlock();
+    void unlock(bool unlocked = true);
     void setPrice(int newPrice);
     void unBuy();
 

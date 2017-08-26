@@ -202,6 +202,18 @@ Value::operator Array () const
   return _Array;
 }
 
+size_t Value::size() const
+{
+  switch (_valueType) {
+    case ARRAY:
+      return _Array.size();
+    case OBJECT:
+      return _Object.size();
+    default:
+      throw std::logic_error("bad value type requested : " + valueToString(_valueType) + " instead of ARRAY or OBJECT");
+  }
+}
+
 
 ostream& operator<<(ostream& flux, const Value& val)
 {
