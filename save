@@ -1,0 +1,51 @@
+{
+	"asteroids": {
+		"golden chance": 15,
+		"spawn rate": 8
+	},
+	"money": {
+		"drop chance": 11,
+		"level": 7,
+		"money": -51597704,
+		"total": 6321376
+	},
+	"player": {
+		"fire type": 2,
+		"life": 13,
+		"magnet range": 224,
+		"max life": 25,
+		"rotation speed": 6.19174,
+		"shield": {
+			"level": 0,
+			"max": 3
+		},
+		"shot speed": 10.7546,
+		"shot type": 1,
+		"speed": 4.04556
+	},
+	"score": 0,
+	"shop upgrade": [
+		20,
+		10,
+		10,
+		15,
+		10,
+		7,
+		12,
+		8,
+		14,
+		3
+	],
+	"weapons": {
+		"firing pattern": [
+			true,
+			true,
+			true
+		],
+		"shot type": [
+			true,
+			true,
+			true
+		]
+	}
+}

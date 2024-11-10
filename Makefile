@@ -7,7 +7,6 @@ all:
 	g++ -c -fPIC objects.cpp -o objects.o $(SFML) -m64
 	g++ -c -fPIC player.cpp -o player.o $(SFML) -m64
 	g++ main.cpp json/json.o functions.o shop.o objects.o player.o $(SFML-AUDIO) -m64
-	./a.out
 
 debug:
 	g++ -g -c -fPIC functions.cpp -o functions.o $(SFML) -m64
